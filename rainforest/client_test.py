@@ -1,4 +1,4 @@
-from .client import Rainforest, requests
+from .client import Rainforest, requests, RainforestError
 from mock import Mock
 from .models import TestRun
 from requests import Response
@@ -14,6 +14,27 @@ class TestRainforest(TestCase):
     def test_run_tests(self):
         rainforest = Rainforest('CLIENT_TOKEN')
 
+        # Validate that the potential for an invalid client token raises an exception
+        mocked_response = Response()
+        mocked_response.status_code = 404
+        mocked_response._content = '{"error":"Account not found"}'
+
+        requests.post = Mock(return_value=mocked_response)
+
+        with self.assertRaises(RainforestError):
+            rainforest.run_tests([1,2,3])
+
+        # Validate that the potential for an invalid client token raises an exception
+        mocked_response = Response()
+        mocked_response.status_code = 400
+        mocked_response._content = '{"error":"You must specify the tags or tests parameter"}'
+
+        requests.post = Mock(return_value=mocked_response)
+
+        with self.assertRaises(RainforestError):
+            rainforest.run_tests(["a","b","c"])
+
+        # Validate that tests get returned properly on a successful case
         mocked_response = Response()
         mocked_response.status_code = 201
         mocked_response._content = '{"id":1,"object":"Run","created_at":"2014-04-19T06:06:47Z","environment_id":1770,"state_log":[],"state":"queued","result":"no_result","expected_wait_time":8100.0,"browsers":[{"name":"chrome","state":"disabled"},{"name":"firefox","state":"disabled"},{"name":"ie8","state":"disabled"},{"name":"ie9","state":"disabled"},{"name":"safari","state":"disabled"}],"requested_tests":[1,2,3]}'

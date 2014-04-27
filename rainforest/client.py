@@ -3,6 +3,9 @@ from .models import TestRun
 import json
 import requests
 
+class RainforestError(Exception):
+    pass
+
 class Rainforest(object):
     """
     A client to interact with the RainforestQA API
@@ -17,7 +20,7 @@ class Rainforest(object):
         """
         Invoke a test run for an array of test ids
 
-        :param []int test_ids: An array of test ids to run
+        :param test_ids: An array of test ids to run or the string "all" to run all tests
         """
         r = requests.post(self.base_url + '/runs', data=json.dumps({
             'tests': test_ids
@@ -28,6 +31,9 @@ class Rainforest(object):
         })
 
         json_response = r.json()
+
+        if r.status_code != 201:
+            raise RainforestError(json_response.get('error', 'Unknown error has occurred'))
 
         return TestRun(
             id                  = json_response.get('id'), 

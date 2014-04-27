@@ -8,10 +8,13 @@ class RainforestError(Exception):
 
 class Rainforest(object):
     """
-    A client to interact with the RainforestQA API
+    A client to interact with the Rainforest API
 
     :param str client_token: Your account's API Client Token
     """
+
+    ALL_TESTS = "all"
+    
     def __init__(self, client_token, base_url='https://app.rainforestqa.com/api/1'):
         self.client_token = client_token
         self.base_url = base_url
